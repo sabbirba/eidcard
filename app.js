@@ -237,11 +237,12 @@ function shareCard() {
 
 async function downloadCard() {
   const svgElement = svgContainer.querySelector("svg");
-  if (!svgElement) {
-    return;
-  }
+  if (!svgElement) return;
+
   const serializer = new XMLSerializer();
   let svgString = serializer.serializeToString(svgElement);
+
+  // embed font as data URI when possible so exported raster contains the font
   const fontUrl = "assets/AbuSayed-Regular.woff2";
   const fontData = await fetch(fontUrl)
     .then((r) => r.arrayBuffer())
@@ -250,38 +251,63 @@ async function downloadCard() {
       return `data:font/woff2;base64,${base64}`;
     })
     .catch(() => null);
+
   if (fontData) {
     const fontFace = `@font-face{font-family:'lamppost-abu-sayed';src:url('${fontData}') format('woff2')}`;
     svgString = svgString.replace("</style>", `${fontFace}</style>`);
   }
+
   const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
   const url = URL.createObjectURL(blob);
+
+  // prepare filename early so fallback handlers can use it
+  const name = nameInput.value.trim();
+  const templateId = currentTemplateIndex + 1;
+  const filename = name
+    ? `lamppost-card-${name.replace(/\s+/g, "-")}-${templateId}-${Date.now()}.png`
+    : `lamppost-card-${templateId}-${Date.now()}.png`;
+
   const img = new Image();
   img.onload = () => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const viewBox = svgElement.getAttribute("viewBox");
-    if (viewBox) {
-      const [, , w, h] = viewBox.split(/\s+|,/).map(Number);
-      canvas.width = w * 1.5;
-      canvas.height = h * 1.5;
-    } else {
-      canvas.width = 2000;
-      canvas.height = 3200;
+    try {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const viewBox = svgElement.getAttribute("viewBox");
+      if (viewBox) {
+        const [, , w, h] = viewBox.split(/\s+|,/).map(Number);
+        canvas.width = w * 1.5;
+        canvas.height = h * 1.5;
+      } else {
+        canvas.width = 2000;
+        canvas.height = 3200;
+      }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = filename;
+      link.click();
+    } catch (e) {
+      // fall back to raw svg download if something goes wrong
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename.replace(/\.png$/, ".svg");
+      link.click();
+    } finally {
+      URL.revokeObjectURL(url);
     }
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const name = nameInput.value.trim();
-    const templateId = currentTemplateIndex + 1;
-    const filename = name
-      ? `lamppost-card-${name}-${templateId}-${Date.now()}.png`
-      : `lamppost-card-${templateId}-${Date.now()}.png`;
+  };
+
+  img.onerror = () => {
+    // If rasterization fails, fallback to downloading the raw SVG blob
     const link = document.createElement("a");
-    link.href = canvas.toDataURL("image/png");
-    link.download = filename;
+    link.href = url;
+    link.download = filename.replace(/\.png$/, ".svg");
     link.click();
     URL.revokeObjectURL(url);
   };
-  img.onerror = () => (img.src = url);
+
+  // start loading the generated SVG blob into the image
+  img.src = url;
 }
 
 function handleIncomingShare() {

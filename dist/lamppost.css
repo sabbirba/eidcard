@@ -945,3 +945,23 @@
     font-size: 0.95rem;
   }
 }
+
+/* Lamppost custom font and utility classes */
+@font-face {
+  font-family: 'lamppost-abu-sayed';
+  src: url('../assets/AbuSayed-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-abu-sayed {
+  font-family: 'lamppost-abu-sayed', var(--default-font-family);
+}
+
+.logo-img {
+  width: 160px;
+  height: auto;
+  max-width: 42vw;
+  display: block;
+}
