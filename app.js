@@ -149,7 +149,7 @@ function updateSVGText(name, note, textColor = currentTextColor) {
       el.setAttribute("x", width / 2);
       el.setAttribute("y", nameY.toFixed(2));
       el.setAttribute("text-anchor", "middle");
-      el.setAttribute("font-family", "lamppost-abu-sayed");
+  el.setAttribute("font-family", "li-shamim-chitranee");
       el.setAttribute("font-size", fs);
       el.setAttribute("fill", textColor);
       el.setAttribute("font-weight", "500");
@@ -167,7 +167,7 @@ function updateSVGText(name, note, textColor = currentTextColor) {
         el.setAttribute("x", width / 2);
         el.setAttribute("y", y.toFixed(2));
         el.setAttribute("text-anchor", "middle");
-        el.setAttribute("font-family", "lamppost-abu-sayed");
+  el.setAttribute("font-family", "li-shamim-chitranee");
         el.setAttribute("font-size", noteFs.toFixed(2));
         el.setAttribute("fill", textColor);
         el.setAttribute("font-weight", "400");
@@ -181,7 +181,7 @@ function updateSVGText(name, note, textColor = currentTextColor) {
       "style",
     );
     styleEl.textContent =
-      "@font-face{font-family:'lamppost-abu-sayed';src:url('assets/Li Shamim Chitranee Unicode.ttf') format('truetype')}";
+      "@font-face{font-family:'li-shamim-chitranee';src:url('assets/Li Shamim Chitranee Unicode.ttf') format('truetype')}";
     svgElement.insertBefore(styleEl, svgElement.firstChild);
     svgElement.removeAttribute("width");
     svgElement.removeAttribute("height");
@@ -252,7 +252,7 @@ async function downloadCard() {
     .catch(() => null);
 
   if (fontData) {
-    const fontFace = `@font-face{font-family:'lamppost-abu-sayed';src:url('${fontData}') format('woff2')}`;
+    const fontFace = `@font-face{font-family:'li-shamim-chitranee';src:url('${fontData}') format('truetype')}`;
     svgString = svgString.replace("</style>", `${fontFace}</style>`);
   }
 
@@ -349,7 +349,7 @@ function handleIncomingShare() {
       nameEl.setAttribute("x", w / 2);
       nameEl.setAttribute("y", nameY.toFixed(2));
       nameEl.setAttribute("text-anchor", "middle");
-      nameEl.setAttribute("font-family", "lamppost-abu-sayed");
+  nameEl.setAttribute("font-family", "li-shamim-chitranee");
       nameEl.setAttribute("font-size", (h * 0.037).toFixed(2));
       nameEl.setAttribute("fill", template.color);
       nameEl.setAttribute("font-weight", "500");
@@ -368,7 +368,7 @@ function handleIncomingShare() {
           el.setAttribute("x", w / 2);
           el.setAttribute("y", (startY + i * noteFs * 1.2).toFixed(2));
           el.setAttribute("text-anchor", "middle");
-          el.setAttribute("font-family", "lamppost-abu-sayed");
+          el.setAttribute("font-family", "li-shamim-chitranee");
           el.setAttribute("font-size", noteFs.toFixed(2));
           el.setAttribute("fill", template.color);
           el.setAttribute("font-weight", "400");
