@@ -181,7 +181,7 @@ function updateSVGText(name, note, textColor = currentTextColor) {
       "style",
     );
     styleEl.textContent =
-      "@font-face{font-family:'li-shamim-chitranee';src:url('assets/Li Shamim Chitranee Unicode.ttf') format('truetype')}";
+      "@font-face{font-family:'li-shamim-chitranee';src:url('assets/Li Shamim Chitranee Unicode.woff2') format('woff2')}";
     svgElement.insertBefore(styleEl, svgElement.firstChild);
     svgElement.removeAttribute("width");
     svgElement.removeAttribute("height");
