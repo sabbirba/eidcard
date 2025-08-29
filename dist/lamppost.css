@@ -946,17 +946,16 @@
   }
 }
 
-/* Lamppost custom font and utility classes */
 @font-face {
-  font-family: 'lamppost-abu-sayed';
-  src: url('../assets/AbuSayed-Regular.woff2') format('woff2');
+  font-family: "lamppost-abu-sayed";
+  src: url("../assets/Li Shamim Chitranee Unicode.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 .font-abu-sayed {
-  font-family: 'lamppost-abu-sayed', var(--default-font-family);
+  font-family: "lamppost-abu-sayed", var(--default-font-family);
 }
 
 .logo-img {

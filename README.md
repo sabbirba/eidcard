@@ -4,7 +4,7 @@ A small static site and card generator adapted from an Eid-card template. Use it
 
 Quick start
 
-1. From the project root, run a simple static server. Python 3 example:
+1. From the project root, run a simple static server. Python3 example:
 
 ```bash
 # start a static web server on port 8000
@@ -13,9 +13,9 @@ python3 -m http.server 8000
 ```
 
 2. Open `index.html` in your browser (or the URL above). The UI provides:
-	- Template thumbnails (left) to choose card backgrounds
-	- Name and Note fields (right) to customize the card
-	- Buttons: Download (PNG), Share (copy link / Web Share fallback), QR (download QR image)
+   - Template thumbnails (left) to choose card backgrounds
+   - Name and Note fields (right) to customize the card
+   - Buttons: Download (PNG), Share (copy link / Web Share fallback), QR (download QR image)
 
 Key files
 
@@ -23,7 +23,7 @@ Key files
 - `app.js` — client-side logic: template loading, SVG composition, PNG export, QR generation and share helpers.
 - `dist/lamppost.css` — stylesheet (copied from the original project and extended with small layout tweaks).
 - `templates/` — SVG template files used as card backgrounds.
-- `assets/` — fonts and images (including `AbuSayed-Regular.woff2` and `logo.webp`).
+- `assets/` — fonts and images (including `Li Shamim Chitranee Unicode.ttf` and `logo.webp`).
 
 Notable behavior and decisions
 
@@ -34,7 +34,7 @@ Notable behavior and decisions
 Troubleshooting
 
 - If templates don't load, confirm the `templates/` files exist and the server can serve them (CORS is not an issue for a local static server).
-- If fonts don't embed into exported PNGs, ensure `assets/AbuSayed-Regular.woff2` exists and is reachable.
+- If fonts don't embed into exported PNGs, ensure `assets/Li Shamim Chitranee Unicode.ttf` exists and is reachable.
 - If share/copy doesn't work in your browser, check that the page is served over HTTPS or served from `localhost` (clipboard and Web Share API may be restricted in insecure contexts).
 
 Contributing / next steps

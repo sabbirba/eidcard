@@ -181,7 +181,7 @@ function updateSVGText(name, note, textColor = currentTextColor) {
       "style",
     );
     styleEl.textContent =
-      "@font-face{font-family:'lamppost-abu-sayed';src:url('assets/AbuSayed-Regular.woff2') format('woff2')}";
+      "@font-face{font-family:'lamppost-abu-sayed';src:url('assets/Li Shamim Chitranee Unicode.ttf') format('truetype')}";
     svgElement.insertBefore(styleEl, svgElement.firstChild);
     svgElement.removeAttribute("width");
     svgElement.removeAttribute("height");
@@ -242,8 +242,7 @@ async function downloadCard() {
   const serializer = new XMLSerializer();
   let svgString = serializer.serializeToString(svgElement);
 
-  // embed font as data URI when possible so exported raster contains the font
-  const fontUrl = "assets/AbuSayed-Regular.woff2";
+  const fontUrl = "assets/Li Shamim Chitranee Unicode.ttf";
   const fontData = await fetch(fontUrl)
     .then((r) => r.arrayBuffer())
     .then((buf) => {
@@ -260,7 +259,6 @@ async function downloadCard() {
   const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
   const url = URL.createObjectURL(blob);
 
-  // prepare filename early so fallback handlers can use it
   const name = nameInput.value.trim();
   const templateId = currentTemplateIndex + 1;
   const filename = name
@@ -287,7 +285,6 @@ async function downloadCard() {
       link.download = filename;
       link.click();
     } catch (e) {
-      // fall back to raw svg download if something goes wrong
       const link = document.createElement("a");
       link.href = url;
       link.download = filename.replace(/\.png$/, ".svg");
@@ -298,7 +295,6 @@ async function downloadCard() {
   };
 
   img.onerror = () => {
-    // If rasterization fails, fallback to downloading the raw SVG blob
     const link = document.createElement("a");
     link.href = url;
     link.download = filename.replace(/\.png$/, ".svg");
@@ -306,7 +302,6 @@ async function downloadCard() {
     URL.revokeObjectURL(url);
   };
 
-  // start loading the generated SVG blob into the image
   img.src = url;
 }
 
