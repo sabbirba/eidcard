@@ -1,0 +1,11 @@
+{
+  "name": "eidcard",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate:woff2": "node tools/generate-woff2.js"
+  },
+  "devDependencies": {
+    "ttf2woff2": "^4.0.0"
+  }
+}

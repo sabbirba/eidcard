@@ -149,7 +149,7 @@ function updateSVGText(name, note, textColor = currentTextColor) {
       el.setAttribute("x", width / 2);
       el.setAttribute("y", nameY.toFixed(2));
       el.setAttribute("text-anchor", "middle");
-  el.setAttribute("font-family", "li-shamim-chitranee");
+      el.setAttribute("font-family", "li-shamim-chitranee");
       el.setAttribute("font-size", fs);
       el.setAttribute("fill", textColor);
       el.setAttribute("font-weight", "500");
@@ -167,7 +167,7 @@ function updateSVGText(name, note, textColor = currentTextColor) {
         el.setAttribute("x", width / 2);
         el.setAttribute("y", y.toFixed(2));
         el.setAttribute("text-anchor", "middle");
-  el.setAttribute("font-family", "li-shamim-chitranee");
+        el.setAttribute("font-family", "li-shamim-chitranee");
         el.setAttribute("font-size", noteFs.toFixed(2));
         el.setAttribute("fill", textColor);
         el.setAttribute("font-weight", "400");
@@ -242,19 +242,16 @@ async function downloadCard() {
   const serializer = new XMLSerializer();
   let svgString = serializer.serializeToString(svgElement);
 
-  const fontUrl = "assets/Li Shamim Chitranee Unicode.ttf";
-  const fontData = await fetch(fontUrl)
-    .then((r) => r.arrayBuffer())
-    .then((buf) => {
+  try {
+    const res = await fetch("assets/Li Shamim Chitranee Unicode.woff2");
+    if (res && res.ok) {
+      const buf = await res.arrayBuffer();
       const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-      return `data:font/woff2;base64,${base64}`;
-    })
-    .catch(() => null);
-
-  if (fontData) {
-    const fontFace = `@font-face{font-family:'li-shamim-chitranee';src:url('${fontData}') format('truetype')}`;
-    svgString = svgString.replace("</style>", `${fontFace}</style>`);
-  }
+      const fontData = `data:font/woff2;base64,${base64}`;
+      const fontFace = `@font-face{font-family:'li-shamim-chitranee';src:url('${fontData}') format('woff2')}`;
+      svgString = svgString.replace("</style>", `${fontFace}</style>`);
+    }
+  } catch (e) {}
 
   const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -349,7 +346,7 @@ function handleIncomingShare() {
       nameEl.setAttribute("x", w / 2);
       nameEl.setAttribute("y", nameY.toFixed(2));
       nameEl.setAttribute("text-anchor", "middle");
-  nameEl.setAttribute("font-family", "li-shamim-chitranee");
+      nameEl.setAttribute("font-family", "li-shamim-chitranee");
       nameEl.setAttribute("font-size", (h * 0.037).toFixed(2));
       nameEl.setAttribute("fill", template.color);
       nameEl.setAttribute("font-weight", "500");
