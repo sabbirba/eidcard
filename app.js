@@ -96,13 +96,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const downloadQRCodeButtonEl = document.getElementById(
     "downloadQRCodeButton",
   );
-  if (downloadCardButton)
+  // Attach listeners independently so multiple action buttons can coexist.
+  if (downloadCardButton) {
     downloadCardButton.addEventListener("click", downloadCard);
-  else if (shareCardButton) {
+  }
+  if (shareCardButton) {
     shareCardButton.addEventListener("click", shareCard);
-  } else if (downloadQRCodeButtonEl) {
+  }
+  if (downloadQRCodeButtonEl) {
     downloadQRCodeButtonEl.addEventListener("click", generateQRCode);
-  } else qrModal = document.getElementById("qrModal");
+  }
+  // Always initialize the modal reference so generateQRCode/openQrModal can use it.
+  qrModal = document.getElementById("qrModal");
   qrImage = document.getElementById("qrImage");
   closeQrModal = document.getElementById("closeQrModal");
   downloadQrImageButton = document.getElementById("downloadQrImageButton");
