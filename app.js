@@ -6,6 +6,67 @@ const nextButton = document.getElementById("nextButton");
 const templateThumbnailsContainer =
   document.getElementById("templateThumbnails");
 
+let qrModal = null;
+let qrImage = null;
+let closeQrModal = null;
+let downloadQrImageButton = null;
+let lastFocusedElement = null;
+
+function handleEscape(e) {
+  if (e.key === "Escape") closeQrModalFn();
+}
+
+function trapFocus(e) {
+  if (e.key !== "Tab") return;
+  if (!qrModal) return;
+  const focusable = Array.from(
+    qrModal.querySelectorAll(
+      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+    ),
+  );
+  if (focusable.length === 0) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (e.shiftKey) {
+    if (document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    }
+  } else {
+    if (document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+}
+
+function openQrModal() {
+  if (!qrModal) return;
+  lastFocusedElement = document.activeElement;
+  qrModal.classList.remove("hidden");
+  qrModal.classList.add("flex");
+  qrModal.setAttribute("aria-hidden", "false");
+  const focusable = qrModal.querySelectorAll(
+    'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+  );
+  const first = focusable[0];
+  if (first) first.focus();
+  qrModal.addEventListener("keydown", trapFocus);
+  document.addEventListener("keydown", handleEscape);
+}
+
+function closeQrModalFn() {
+  if (!qrModal) return;
+  qrModal.classList.remove("flex");
+  qrModal.classList.add("hidden");
+  qrModal.setAttribute("aria-hidden", "true");
+  qrModal.removeEventListener("keydown", trapFocus);
+  document.removeEventListener("keydown", handleEscape);
+  if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+    lastFocusedElement.focus();
+  }
+}
+
 const templates = [
   { path: "templates/template1.svg", color: "#3f3b3a" },
   { path: "templates/template2.svg", color: "#ffb400" },
@@ -28,17 +89,28 @@ document.addEventListener("DOMContentLoaded", () => {
   noteInput.addEventListener("input", () =>
     updateSVGText(nameInput.value, noteInput.value),
   );
-  prevButton.addEventListener("click", showPreviousTemplate);
-  nextButton.addEventListener("click", showNextTemplate);
-  document
-    .getElementById("downloadCardButton")
-    .addEventListener("click", downloadCard);
-  document
-    .getElementById("shareCardButton")
-    .addEventListener("click", shareCard);
-  document
-    .getElementById("downloadQRCodeButton")
-    .addEventListener("click", generateQRCode);
+  if (prevButton) prevButton.addEventListener("click", showPreviousTemplate);
+  if (nextButton) nextButton.addEventListener("click", showNextTemplate);
+  const downloadCardButton = document.getElementById("downloadCardButton");
+  const shareCardButton = document.getElementById("shareCardButton");
+  const downloadQRCodeButtonEl = document.getElementById(
+    "downloadQRCodeButton",
+  );
+  if (downloadCardButton)
+    downloadCardButton.addEventListener("click", downloadCard);
+  else if (shareCardButton) {
+    shareCardButton.addEventListener("click", shareCard);
+  } else if (downloadQRCodeButtonEl) {
+    downloadQRCodeButtonEl.addEventListener("click", generateQRCode);
+  } else qrModal = document.getElementById("qrModal");
+  qrImage = document.getElementById("qrImage");
+  closeQrModal = document.getElementById("closeQrModal");
+  downloadQrImageButton = document.getElementById("downloadQrImageButton");
+  if (closeQrModal) closeQrModal.addEventListener("click", closeQrModalFn);
+  if (qrModal)
+    qrModal.addEventListener("click", (e) => {
+      if (e.target === qrModal) closeQrModalFn();
+    });
   handleIncomingShare();
 });
 
@@ -198,40 +270,143 @@ function updateSVGText(name, note, textColor = currentTextColor) {
 function generateQRCode() {
   const name = nameInput.value.trim();
   const note = noteInput.value.trim();
-  if (!name) {
-    return;
-  }
   const templateId = currentTemplateIndex + 1;
-  let shareUrl = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&id=${templateId}`;
-  if (note) shareUrl += `&note=${encodeURIComponent(note)}`;
-  const qr = new QRious({ value: shareUrl, size: 250 });
-  const link = document.createElement("a");
-  link.href = qr.toDataURL();
-  link.download = "lamppost-card-qr-code.png";
-  link.click();
+
+  const params = new URLSearchParams();
+  if (name) params.set("name", name);
+  params.set("id", String(templateId));
+  if (note) params.set("note", note);
+  const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+
+  const qr = new QRious({ value: shareUrl, size: 512 });
+  const dataUrl = qr.toDataURL();
+  if (qrImage) qrImage.src = dataUrl;
+  if (qrModal) {
+    openQrModal();
+  }
+  if (downloadQrImageButton) {
+    downloadQrImageButton.onclick = () => {
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = "lamppost-card-qr-code.png";
+      a.click();
+    };
+  }
 }
 
 function shareCard() {
   const name = nameInput.value.trim();
   const note = noteInput.value.trim();
-  if (!name) {
+  const templateId = currentTemplateIndex + 1;
+
+  const params = new URLSearchParams();
+  if (name) params.set("name", name);
+  params.set("id", String(templateId));
+  if (note) params.set("note", note);
+  const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+
+  const svgElement = svgContainer.querySelector("svg");
+  if (!svgElement) {
+    try {
+      navigator.clipboard.writeText(shareUrl);
+    } catch (e) {}
     return;
   }
-  const templateId = currentTemplateIndex + 1;
-  let shareUrl = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&id=${templateId}`;
-  if (note) shareUrl += `&note=${encodeURIComponent(note)}`;
-  navigator.clipboard
-    .writeText(shareUrl)
-    .then(() => {})
-    .catch(() => {
-      if (navigator.share) {
-        navigator
-          .share({ title: "Lamppost Card", text: shareUrl })
-          .catch(() => {});
-      } else {
+
+  const serializer = new XMLSerializer();
+  let svgString = serializer.serializeToString(svgElement);
+
+  fetch("assets/Li Shamim Chitranee Unicode.woff2")
+    .then((res) => (res.ok ? res.arrayBuffer() : Promise.reject()))
+    .then((buf) => {
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      const fontData = `data:font/woff2;base64,${base64}`;
+      const fontFace = `@font-face{font-family:'li-shamim-chitranee';src:url('${fontData}') format('woff2')}`;
+      svgString = svgString.replace("</style>", `${fontFace}</style>`);
+      return svgString;
+    })
+    .catch(() => svgString)
+    .then((finalSvg) => {
+      const svgBlob = new Blob([finalSvg], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = async () => {
         try {
+          const canvas = document.createElement("canvas");
+          const viewBox = svgElement.getAttribute("viewBox");
+          let w = 1000,
+            h = 1600;
+          if (viewBox) {
+            const [, , ww, hh] = viewBox.split(/\s+|,/).map(Number);
+            w = ww * 1.5;
+            h = hh * 1.5;
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "white";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          if (navigator.canShare && navigator.canShare({ files: [] })) {
+            canvas.toBlob(async (blob) => {
+              const file = new File([blob], `lamppost-card-${name}.png`, {
+                type: blob.type,
+              });
+              try {
+                await navigator.share({
+                  files: [file],
+                  title: "Lamppost Card",
+                  text: name,
+                });
+                URL.revokeObjectURL(url);
+              } catch (e) {
+                try {
+                  await navigator.clipboard.writeText(shareUrl);
+                } catch (e) {}
+                URL.revokeObjectURL(url);
+              }
+            }, "image/png");
+          } else if (navigator.share) {
+            try {
+              await navigator.share({ title: "Lamppost Card", text: shareUrl });
+              URL.revokeObjectURL(url);
+            } catch (e) {
+              try {
+                await navigator.clipboard.writeText(shareUrl);
+              } catch (e) {}
+              URL.revokeObjectURL(url);
+            }
+          } else {
+            canvas.toBlob((blob) => {
+              const a = document.createElement("a");
+              const objectUrl = URL.createObjectURL(blob);
+              a.href = objectUrl;
+              a.download = `lamppost-card-${name}.png`;
+              a.click();
+              URL.revokeObjectURL(objectUrl);
+              try {
+                navigator.clipboard.writeText(shareUrl);
+              } catch (e) {}
+            }, "image/png");
+            URL.revokeObjectURL(url);
+          }
+        } catch (e) {
+          try {
+            navigator.clipboard.writeText(shareUrl);
+          } catch (e) {}
+          URL.revokeObjectURL(url);
+        }
+      };
+      img.onerror = () => {
+        try {
+          navigator.clipboard.writeText(shareUrl);
         } catch (e) {}
-      }
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
     });
 }
 
